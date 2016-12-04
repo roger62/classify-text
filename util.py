@@ -110,7 +110,7 @@ def bagOfWords(files_data):
     returns a `scipy.sparse.coo_matrix`
     """
 
-    count_vector = sklearn.feature_extraction.text.CountVectorizer()
+    count_vector = sklearn.feature_extraction.text.CountVectorizer(stop_words='english')
     return count_vector.fit_transform(files_data)
 
 
@@ -125,6 +125,17 @@ def refine_all_emails(file_data):
         file_data[i] = refine_single_email(email)
 
 
+def is_metadata(val, meta_list):
+    is_meta = False
+
+    for meta in meta_list:
+        if meta in val:
+            is_meta = True
+
+    return is_meta
+
+
+ 
 def refine_single_email(email):
     """
     Delete the unnecessary information in the header of emails
@@ -132,24 +143,31 @@ def refine_single_email(email):
     parameter is a string.
     returns a string.
     """
+    header_metadata_filter = ["Path:","Date:", "Expires:", 
+                              "Message-ID:", "NNTP-Posting-Host", 
+                              "Newsgroups:", "Xref:", "Lines:"]
 
     parts = email.split('\n')
     newparts = []
 
-    # finished is when we have reached a line with something like 'Lines:' at the begining of it
+    # finished is when we have reached a line with something like 'Lines:' at the beginning of it
     # this is because we want to only remove stuff from headers of emails
     # look at the dataset!
     finished = False
     for part in parts:
         if finished:
             newparts.append(part)
-            continue
-        if not (part.startswith('Path:') or part.startswith('Newsgroups:') or part.startswith('Xref:')) and not finished:
+        if not finished and not is_metadata(part, header_metadata_filter):
             newparts.append(part)
-        if part.startswith('Lines:'):
+        #Empty strings return false
+        if not part:
             finished = True
 
     return '\n'.join(newparts)
+
+
+def custom_email_filter(email):
+    return email;
 
 if __name__ == '__main__':
     main()

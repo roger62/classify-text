@@ -68,7 +68,7 @@ def reorganize_dataset(path):
 
 
 def main_test(path=None):
-    dir_path = path or 'dataset'
+    dir_path = path or 'reuters_data'
 
     remove_incompatible_files(dir_path)
 
@@ -89,8 +89,10 @@ def main_test(path=None):
     # TFIDF
     print colored('Calculating TFIDF', 'green', attrs=['bold'])
     tf_transformer = sklearn.feature_extraction.text.TfidfTransformer(use_idf=True).fit(word_counts)
-    X = tf_transformer.transform(word_counts)
-
+    document_term_matrix = tf_transformer.transform(word_counts)
+    
+    #print(document_term_matrix)
+    
     print '\n\n'
 
     # create classifier
@@ -100,11 +102,16 @@ def main_test(path=None):
     weights = 'uniform'
     weights = 'distance'
     clf = sklearn.neighbors.KNeighborsClassifier(n_neighbors, weights=weights)
+    print(files.target)
+    print(len(files.data))
+    print(len(files.target))
 
+    print(len(files.target_names))
     # test the classifier
     print '\n\n'
     print colored('Testing classifier with train-test split', 'magenta', attrs=['bold'])
-    test_classifier(X, files.target, clf, test_size=0.2, y_names=files.target_names, confusion=False)
+    test_classifier(document_term_matrix, files.target, clf, 
+                    test_size=0.2, y_names=files.target_names, confusion=False)
 
 
 def remove_incompatible_files(dir_path):
@@ -135,4 +142,4 @@ def test_classifier(X, y, clf, test_size=0.4, y_names=None, confusion=False):
         print sklearn.metrics.confusion_matrix(y_test, y_predicted)
 
 if __name__ == '__main__':
-    main()
+    main_test()

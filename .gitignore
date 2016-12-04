@@ -1,3 +1,6 @@
 *.pyc
 dataset/dislikes
 dataset/likes
+reuters/
+reuters_data/*
+dataset/*
