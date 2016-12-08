@@ -68,15 +68,18 @@ def reorganize_dataset(path):
             os.rmdir(os.path.join(path, like))
 
 
-def store_results(filename, values):
+def store_results(path, score, percentage, classifier_name, wfilter, values):
 
-    f = open(filename,'w')
+    #print values
+    f = open(path,'arw')
     for val in values:
-        f.write(str(val))
+        #print val
+        line = "{},{},{},{},{}".format(classifier_name, percentage, wfilter, score, val)
+        f.write(line)
         f.write("\n")
     f.close()
 
-def benchmark_clasifier(path, n_tests, document_term_matrix, data, clf, 
+def benchmark_clasifier(path, percentage, wfilter, classifier_name, n_tests, document_term_matrix, data, clf, 
                         test_size, y_names, confusion=False):
     
     results = []
@@ -101,9 +104,9 @@ def benchmark_clasifier(path, n_tests, document_term_matrix, data, clf,
         recall_file_path = "{}/recall_{}.txt".format(path, y_names[i])
         f1_file_path = "{}/f1_{}.txt".format(path, y_names[i])
 
-        store_results(prec_file_path, precision)
-        store_results(recall_file_path, recall)
-        store_results(f1_file_path, f1_score)
+        store_results(path, "precision", percentage, classifier_name, wfilter, precision)
+        store_results(path, "recall", percentage, classifier_name, wfilter, recall)
+        store_results(path, "f1_score", percentage, classifier_name, wfilter, f1_score)
 
 
 def main_test(path=None):
@@ -155,10 +158,10 @@ def main_test(path=None):
             clf  = DecisionTreeClassifier(random_state=0)
         
         for perc in percentage:
-            path = "results/{}_{}/wfilter".format(classifier, perc)
+            path = "results.txt"
 
-            os.makedirs(path)
-            benchmark_clasifier(path, 100, document_term_matrix, files.target, clf, 
+            #os.makedirs(path)
+            benchmark_clasifier(path, perc, True, classifier, 100, document_term_matrix, files.target, clf, 
                         test_size=0.8, y_names=files.target_names, confusion=False)
 
 
