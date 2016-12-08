@@ -68,10 +68,12 @@ def reorganize_dataset(path):
             os.rmdir(os.path.join(path, like))
 
 
-def store_results(filename, value):
+def store_results(filename, values):
 
     f = open(filename,'w')
-    f.write(str(value))
+    for val in values:
+        f.write(str(val))
+        f.write("\n")
     f.close()
 
 def benchmark_clasifier(path, n_tests, document_term_matrix, data, clf, 
@@ -86,22 +88,22 @@ def benchmark_clasifier(path, n_tests, document_term_matrix, data, clf,
 
 
     for i in range(0, len(y_names)):
-        precision = 0
-        recall = 0
-        f1_score = 0
+        precision = []
+        recall = []
+        f1_score = []
 
         for (prec, rec, f1) in results:
-            precision += prec[i]
-            recall += rec[i]
-            f1_score += f1[i]
+            precision.append(prec[i])
+            recall.append(rec[i])
+            f1_score.append(f1[i])
 
         prec_file_path = "{}/prec_{}.txt".format(path, y_names[i])
         recall_file_path = "{}/recall_{}.txt".format(path, y_names[i])
         f1_file_path = "{}/f1_{}.txt".format(path, y_names[i])
 
-        store_results(prec_file_path, precision/n_tests)
-        store_results(recall_file_path, recall/n_tests)
-        store_results(f1_file_path, f1_score/n_tests)
+        store_results(prec_file_path, precision)
+        store_results(recall_file_path, recall)
+        store_results(f1_file_path, f1_score)
 
 
 def main_test(path=None):
@@ -134,11 +136,11 @@ def main_test(path=None):
 
     print files.target_names
     classifiers = ["bayes", "svc", "knn", "dtree"]
+    percentage = [0.2, 0.4, 0.6, 0.8]
 
     for classifier in classifiers:
 
         clf = None
-        path = "results/{}/wfilter".format(classifier)
 
         if classifier is "bayes":
             clf = sklearn.naive_bayes.MultinomialNB()
@@ -151,9 +153,12 @@ def main_test(path=None):
             clf = sklearn.neighbors.KNeighborsClassifier(n_neighbors, weights=weights)
         elif classifier is "dtree":
             clf  = DecisionTreeClassifier(random_state=0)
+        
+        for perc in percentage:
+            path = "results/{}_{}/wfilter".format(classifier, perc)
 
-        os.makedirs(path)
-        benchmark_clasifier(path, 1000, document_term_matrix, files.target, clf, 
+            os.makedirs(path)
+            benchmark_clasifier(path, 100, document_term_matrix, files.target, clf, 
                         test_size=0.8, y_names=files.target_names, confusion=False)
 
 
