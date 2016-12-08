@@ -28,7 +28,8 @@ def test_main():
 
     # calculate the BOW representation
     word_counts = bagOfWords(files.data)
-
+    print "bag"
+    print word_counts
     # TFIDF
     tf_transformer = sklearn.feature_extraction.text.TfidfTransformer(use_idf=True).fit(word_counts)
     X_tfidf = tf_transformer.transform(word_counts)
@@ -112,6 +113,36 @@ def bagOfWords(files_data):
 
     count_vector = sklearn.feature_extraction.text.CountVectorizer(stop_words='english')
     return count_vector.fit_transform(files_data)
+
+
+
+def refine_all_documents(file_data):
+
+    for i, email in zip(range(len(file_data)), file_data):
+        file_data[i] = refine_single_document(email)
+
+
+def refine_single_document(document):
+    parts = document.split('\n')
+    newparts = []
+
+    metadata = ["<DATE>", "<TOPICS>", "<PLACES>",
+                "<PEOPLE>", "<ORGS>", "<EXCHANGES>", 
+                "<COMPANIES>"]
+
+    parsing_unknown = False
+
+    for part in parts:
+
+        if "<UNKNOWN>" in part:
+            parsing_unknown = True
+        elif "</UNKNOWN>" in part:
+            parsing_unknown = False
+        elif part and not parsing_unknown and not is_metadata(part, metadata):
+            newparts.append(part)
+            
+
+    return '\n'.join(newparts)
 
 
 def refine_all_emails(file_data):
