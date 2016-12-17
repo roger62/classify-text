@@ -161,7 +161,7 @@ def main_test(path=None):
             path = "results.txt"
 
             #os.makedirs(path)
-            benchmark_clasifier(path, perc, True, classifier, 100, document_term_matrix, files.target, clf, 
+            benchmark_clasifier(path, perc, False, classifier, 100, document_term_matrix, files.target, clf, 
                         test_size=0.8, y_names=files.target_names, confusion=False)
 
 
